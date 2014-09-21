@@ -1,3 +1,5 @@
+// -*- indent-tabs-mode: t; -*-
+
 'use strict';
 var gutil = require('gulp-util');
 var through = require('through2');
@@ -5,11 +7,15 @@ var autoprefixer = require('autoprefixer-core');
 var applySourceMap = require('vinyl-sourcemaps-apply');
 var objectAssign = require('object-assign');
 
-module.exports = function (opts) {
+module.exports = function (opts, pluginOpts) {
 	opts = opts || {};
+	pluginOpts = pluginOpts || {};
 
 	return through.obj(function (file, enc, cb) {
-		if (file.isNull()) {
+
+		// Ignore non-files and *.map files. The latter are probably being
+		// passed along from gulp-ruby-sass.
+		if (file.isNull() || /\.map$/.test(file.path)) {
 			cb(null, file);
 			return;
 		}
@@ -21,10 +27,11 @@ module.exports = function (opts) {
 
 		var res;
 		var fileOpts = objectAssign({}, opts);
+		var useSourceMap = pluginOpts.map ? true : false;
 
 		try {
 			res = autoprefixer(fileOpts).process(file.contents.toString(), {
-				map: file.sourceMap ? {annotation: false} : false,
+				map: file.sourceMap ? {annotation: false} : useSourceMap,
 				from: file.relative,
 				to: file.relative
 			});
