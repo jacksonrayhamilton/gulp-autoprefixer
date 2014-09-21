@@ -13,9 +13,8 @@ module.exports = function (opts, pluginOpts) {
 
 	return through.obj(function (file, enc, cb) {
 
-		// Ignore non-files and *.map files. The latter are probably being
-		// passed along from gulp-ruby-sass.
-		if (file.isNull() || /\.map$/.test(file.path)) {
+		// Ignore non-files and non-*.css files.
+		if (file.isNull() || !file.path || !/\.css$/.test(file.path)) {
 			cb(null, file);
 			return;
 		}
